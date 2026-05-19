@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Finanzas Yulisa | Dashboard 10/10</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root{
+      --bg:#f7f3fb;--card:#ffffff;--text:#1f2937;--muted:#6b7280;
+      --primary:#ec4899;--primary2:#8b5cf6;--dark:#111827;
+      --green:#10b981;--red:#ef4444;--yellow:#f59e0b;--blue:#3b82f6;
+      --border:#e5e7eb;--shadow:0 16px 38px rgba(15,23,42,.10);--radius:24px;
+    }
+    body.dark{
+      --bg:#0f172a;--card:#111827;--text:#f9fafb;--muted:#9ca3af;
+      --border:#374151;--shadow:0 18px 44px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--text);min-height:100vh;
+      background:radial-gradient(circle at top left,rgba(236,72,153,.22),transparent 32%),
+                 radial-gradient(circle at top right,rgba(139,92,246,.20),transparent 32%),
+                 var(--bg);
+    }
+    .login-screen{
+      min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+      background:linear-gradient(135deg,#111827,#be185d,#8b5cf6);
+    }
+    .login-box{
+      width:100%;max-width:430px;background:rgba(255,255,255,.95);border-radius:30px;
+      padding:30px;box-shadow:0 24px 70px rgba(0,0,0,.25);text-align:center;
+    }
+    .login-box h1{margin:0;font-size:31px;color:#111827}
+    .login-box p{color:#6b7280}
+    .login-box input{margin:8px 0 12px}
+    header{
+      padding:28px 38px;background:linear-gradient(135deg,#111827,#ec4899 55%,#8b5cf6);
+      color:white;border-bottom-left-radius:32px;border-bottom-right-radius:32px;box-shadow:var(--shadow);
+      display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap;
+    }
+    header h1{margin:0;font-size:30px}
+    header p{margin:6px 0 0;opacity:.9}
+    main{padding:24px;max-width:1500px;margin:auto}
+    .grid{display:grid;gap:18px}
+    .top-layout{grid-template-columns:430px 1fr;margin-bottom:18px}
+    .kpis{grid-template-columns:repeat(4,minmax(170px,1fr));margin-bottom:18px}
+    .two{grid-template-columns:390px 1fr}
+    .charts{grid-template-columns:1fr 1fr;margin-top:18px}
+    .three{grid-template-columns:repeat(3,1fr);margin-top:18px}
+    .card{
+      background:rgba(255,255,255,.92);background:var(--card);border:1px solid var(--border);
+      border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);
+    }
+    body.dark .card{background:rgba(17,24,39,.95)}
+    .section-title{font-size:18px;font-weight:900;margin:0 0 14px}
+    .kpi-title{color:var(--muted);font-size:14px;margin-bottom:8px}
+    .kpi-value{font-size:28px;font-weight:950;letter-spacing:-.5px}
+    .kpi-note{font-size:13px;margin-top:6px;color:var(--muted)}
+    label{font-size:13px;font-weight:800;color:var(--muted);margin-bottom:6px;display:block}
+    input,select,button{
+      width:100%;padding:12px 13px;border-radius:15px;border:1px solid var(--border);
+      font-size:14px;outline:none;background:var(--card);color:var(--text);
+    }
+    input:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(236,72,153,.13)}
+    button{cursor:pointer;border:0;font-weight:900;color:white;background:linear-gradient(135deg,var(--primary),#be185d);transition:.18s}
+    button:hover{transform:translateY(-1px);filter:brightness(.98)}
+    .btn-light{background:#111827}.btn-danger{background:var(--red)}.btn-green{background:var(--green)}.btn-blue{background:var(--blue)}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.full{grid-column:1/-1}
+    .salary-card{color:white;background:linear-gradient(135deg,#111827,#be185d,#8b5cf6);position:relative;overflow:hidden}
+    .salary-card:after{content:"";position:absolute;width:240px;height:240px;border-radius:999px;background:rgba(255,255,255,.12);right:-80px;top:-90px}
+    .salary-card input{background:rgba(255,255,255,.95);color:#111827;font-size:21px;font-weight:900;text-align:center}
+    .salary-main,.money-flow{display:grid;gap:12px;position:relative;z-index:2}
+    .salary-main{grid-template-columns:1fr 1fr;margin-top:16px}.money-flow{grid-template-columns:1fr auto 1fr auto 1fr;margin-top:16px;align-items:center}
+    .salary-box,.flow-item{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);border-radius:18px;padding:13px;text-align:center}
+    .salary-label,.flow-title{font-size:12px;opacity:.85}.salary-number{font-size:27px;font-weight:950}.flow-money{font-size:18px;font-weight:950}
+    .progress-wrap{margin-top:18px;background:rgba(255,255,255,.18);border-radius:999px;height:30px;overflow:hidden;position:relative;z-index:2}
+    .progress-bar{height:100%;width:0%;background:linear-gradient(90deg,#10b981,#f59e0b,#ef4444);border-radius:999px;transition:width .55s ease}
+    .progress-text{position:absolute;width:100%;top:5px;text-align:center;color:white;font-size:13px;font-weight:900;text-shadow:0 1px 4px rgba(0,0,0,.35)}
+    .filters{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px}
+    table{width:100%;border-collapse:collapse;background:var(--card);border-radius:18px;overflow:hidden}
+    th,td{padding:12px;border-bottom:1px solid var(--border);font-size:14px;text-align:left}th{background:#111827;color:white}
+    tr:hover{background:rgba(236,72,153,.06)}
+    .pill{padding:6px 10px;border-radius:999px;color:white;font-size:12px;font-weight:900;display:inline-block}
+    .ingreso{background:var(--green)}.gasto{background:var(--red)}.pendiente{background:var(--yellow)}.pagado{background:var(--blue)}
+    .alert{padding:14px;border-radius:17px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;font-weight:800;margin-top:12px}
+    body.dark .alert{background:#422006;color:#fed7aa;border-color:#92400e}
+    .budget-row{display:grid;grid-template-columns:1.2fr .8fr .8fr;gap:10px;align-items:end;margin-bottom:10px}
+    .budget-line{height:12px;background:rgba(148,163,184,.25);border-radius:999px;overflow:hidden;margin-top:7px}
+    .budget-fill{height:100%;background:linear-gradient(90deg,#10b981,#f59e0b,#ef4444);border-radius:999px}
+    .small{font-size:12px;color:var(--muted)}.right{text-align:right}
+    .hidden{display:none}
+    @media(max-width:1050px){
+      header{padding:24px}.kpis,.top-layout,.two,.charts,.three,.filters,.salary-main,.money-flow,.budget-row{grid-template-columns:1fr}
+      .form-grid{grid-template-columns:1fr}.flow-icon{display:none}main{padding:14px}
+      table{font-size:12px}th,td{padding:9px}
+    }
+  </style>
+</head>
+<body>
+<section id="loginScreen" class="login-screen">
+  <div class="login-box">
+    <h1>💖 Finanzas de Yulisa</h1>
+    <p>Acceso privado al dashboard financiero personal.</p>
+    <label style="text-align:left;color:#374151">Correo autorizado</label>
+    <input id="loginEmail" type="email" placeholder="correo@ejemplo.com">
+    <label style="text-align:left;color:#374151">Contraseña</label>
+    <input id="loginPass" type="password" placeholder="Contraseña">
+    <button onclick="login()">Ingresar</button>
+    <p class="small">Usuario autorizado: yulisaruizguajardo@gmail.com</p>
+  </div>
+</section>
+
+<section id="app" class="hidden">
+<header>
+  <div>
+    <h1>💰 Dashboard Financiero 10/10</h1>
+    <p>Sueldo, gastos, presupuestos, ahorro, pagos próximos y comparación mensual.</p>
+  </div>
+  <div style="display:flex;gap:10px;min-width:260px;">
+    <button class="btn-light" onclick="toggleDark()">🌙 Modo</button>
+    <button class="btn-danger" onclick="logout()">Salir</button>
+  </div>
+</header>
+
+<main>
+  <section class="grid top-layout">
+    <div class="card salary-card">
+      <h2 class="section-title">👩‍💼 Sueldo mensual</h2>
+      <label style="color:white;">Sueldo mensual disponible</label>
+      <input type="number" id="sueldoMensual" placeholder="Ej: 900000" oninput="guardarSueldo(); actualizar();" />
+      <div class="salary-main">
+        <div class="salary-box"><div class="salary-label">Presupuesto inicial</div><div class="salary-number" id="presupuestoInicial">$0</div></div>
+        <div class="salary-box"><div class="salary-label">Saldo restante</div><div class="salary-number" id="saldoVisual">$0</div></div>
+      </div>
+      <div class="progress-wrap"><div class="progress-bar" id="barraGasto"></div><div class="progress-text" id="textoBarra">0% usado</div></div>
+      <div class="money-flow">
+        <div class="flow-item"><div class="flow-title">Sueldo + extra</div><div class="flow-money" id="flowSueldo">$0</div></div>
+        <div class="flow-icon">−</div>
+        <div class="flow-item"><div class="flow-title">Gastos</div><div class="flow-money" id="flowGastos">$0</div></div>
+        <div class="flow-icon">=</div>
+        <div class="flow-item"><div class="flow-title">Disponible</div><div class="flow-money" id="flowSaldo">$0</div></div>
+      </div>
+    </div>
+
+    <section class="grid kpis">
+      <div class="card"><div class="kpi-title">Ingresos extra</div><div class="kpi-value" id="kpiIngresos">$0</div><div class="kpi-note">Sin contar sueldo base</div></div>
+      <div class="card"><div class="kpi-title">Gastos del filtro</div><div class="kpi-value" id="kpiGastos">$0</div><div class="kpi-note">Pagados y pendientes</div></div>
+      <div class="card"><div class="kpi-title">Saldo total</div><div class="kpi-value" id="kpiSaldo">$0</div><div class="kpi-note">Disponible real</div></div>
+      <div class="card"><div class="kpi-title">Disponible por día</div><div class="kpi-value" id="kpiDiario">$0</div><div class="kpi-note">Hasta fin de mes</div></div>
+    </section>
+  </section>
+
+  <section class="grid two">
+    <div class="card">
+      <h2 class="section-title">➕ Ingresar movimiento</h2>
+      <div class="form-grid">
+        <div><label>Fecha</label><input type="date" id="fecha"></div>
+        <div><label>Tipo</label><select id="tipo"><option value="Gasto">Gasto</option><option value="Ingreso">Ingreso extra</option></select></div>
+        <div><label>Categoría</label><select id="categoria">
+          <option>Arriendo / Vivienda</option><option>Supermercado</option><option>Transporte</option><option>Servicios</option>
+          <option>Salud</option><option>Deudas / Cuotas</option><option>Ocio</option><option>Ahorro</option><option>Ingreso extra</option><option>Otro</option>
+        </select></div>
+        <div><label>Estado</label><select id="estado"><option>Pagado</option><option>Pendiente</option></select></div>
+        <div class="full"><label>Detalle</label><input type="text" id="detalle" placeholder="Ej: supermercado, luz, salida, bono..."></div>
+        <div><label>Monto</label><input type="number" id="monto" placeholder="Ej: 35000"></div>
+        <div><label>Medio de pago</label><select id="medio"><option>Débito</option><option>Crédito</option><option>Efectivo</option><option>Transferencia</option></select></div>
+        <div class="full"><button onclick="agregarMovimiento()">Agregar</button></div>
+        <div><button class="btn-light" onclick="exportarCSV()">Exportar CSV</button></div>
+        <div><button class="btn-danger" onclick="borrarTodo()">Borrar movimientos</button></div>
+      </div>
+      <div id="alerta" class="alert"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">🔎 Filtros y movimientos</h2>
+      <div class="filters">
+        <div><label>Mes</label><select id="filtroMes" onchange="actualizar()"><option value="">Todos</option></select></div>
+        <div><label>Tipo</label><select id="filtroTipo" onchange="actualizar()"><option value="">Todos</option><option>Ingreso</option><option>Gasto</option></select></div>
+        <div><label>Categoría</label><select id="filtroCategoria" onchange="actualizar()"><option value="">Todas</option></select></div>
+        <div><label>Estado</label><select id="filtroEstado" onchange="actualizar()"><option value="">Todos</option><option>Pagado</option><option>Pendiente</option></select></div>
+        <div><label>Buscar</label><input id="buscar" oninput="actualizar()" placeholder="Detalle..."></div>
+      </div>
+      <table><thead><tr><th>Fecha</th><th>Tipo</th><th>Categoría</th><th>Detalle</th><th>Estado</th><th>Monto</th><th>Acción</th></tr></thead><tbody id="tabla"></tbody></table>
+    </div>
+  </section>
+
+  <section class="grid three">
+    <div class="card">
+      <h2 class="section-title">🎯 Meta de ahorro</h2>
+      <label>Meta mensual</label><input type="number" id="metaAhorro" oninput="guardarMeta(); actualizar();" placeholder="Ej: 100000">
+      <div class="budget-line"><div class="budget-fill" id="metaFill"></div></div>
+      <p class="small" id="metaTexto">Meta: $0</p>
+    </div>
+    <div class="card">
+      <h2 class="section-title">📅 Próximos pagos</h2>
+      <div id="pagosProximos" class="small"></div>
+    </div>
+    <div class="card">
+      <h2 class="section-title">📌 Presupuesto por categoría</h2>
+      <div class="budget-row">
+        <div><label>Categoría</label><select id="budgetCat"></select></div>
+        <div><label>Máximo</label><input type="number" id="budgetMonto" placeholder="Ej: 120000"></div>
+        <button onclick="guardarBudget()">Guardar</button>
+      </div>
+      <div id="budgetList"></div>
+    </div>
+  </section>
+
+  <section class="grid charts">
+    <div class="card"><h2 class="section-title">📊 Gastos por categoría</h2><canvas id="chartCategorias"></canvas></div>
+    <div class="card"><h2 class="section-title">📈 Comparación mensual</h2><canvas id="chartMensual"></canvas></div>
+  </section>
+</main>
+</section>
+
+<script>
+const allowedEmail = "yulisaruizguajardo@gmail.com";
+const demoPass = "1234"; // Cambia esta clave en el código si quieres otra.
+
+function login(){
+  const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+  const pass = document.getElementById("loginPass").value;
+  if(email === allowedEmail && pass === demoPass){
+    localStorage.setItem("finanzasLogin","ok");
+    showApp();
+  }else{
+    alert("Correo o contraseña incorrectos. Clave inicial: 1234");
+  }
+}
+function logout(){localStorage.removeItem("finanzasLogin");location.reload();}
+function showApp(){document.getElementById("loginScreen").classList.add("hidden");document.getElementById("app").classList.remove("hidden");setTimeout(()=>actualizar(),100);}
+function toggleDark(){document.body.classList.toggle("dark");localStorage.setItem("darkFinanzas",document.body.classList.contains("dark")?"1":"0");}
+
+let movimientos = JSON.parse(localStorage.getItem("movimientosFinanzasPro")) || [
+  {fecha:"2026-05-02", tipo:"Gasto", categoria:"Arriendo / Vivienda", detalle:"Arriendo", estado:"Pagado", monto:350000, medio:"Transferencia"},
+  {fecha:"2026-05-03", tipo:"Gasto", categoria:"Supermercado", detalle:"Compra semanal", estado:"Pagado", monto:65000, medio:"Débito"},
+  {fecha:"2026-05-05", tipo:"Gasto", categoria:"Servicios", detalle:"Luz / agua", estado:"Pendiente", monto:45000, medio:"Crédito"}
+];
+let sueldoMensual = Number(localStorage.getItem("sueldoMensualPro")) || 900000;
+let metaAhorro = Number(localStorage.getItem("metaAhorroPro")) || 100000;
+let budgets = JSON.parse(localStorage.getItem("budgetsPro")) || {"Supermercado":180000,"Transporte":80000,"Ocio":70000};
+let chartCategorias, chartMensual;
+
+document.getElementById("fecha").valueAsDate = new Date();
+document.getElementById("sueldoMensual").value = sueldoMensual;
+document.getElementById("metaAhorro").value = metaAhorro;
+if(localStorage.getItem("darkFinanzas")==="1") document.body.classList.add("dark");
+if(localStorage.getItem("finanzasLogin")==="ok") showApp();
+
+function moneda(n){return new Intl.NumberFormat("es-CL",{style:"currency",currency:"CLP",maximumFractionDigits:0}).format(n||0);}
+function guardar(){localStorage.setItem("movimientosFinanzasPro",JSON.stringify(movimientos));}
+function guardarSueldo(){sueldoMensual=Number(document.getElementById("sueldoMensual").value||0);localStorage.setItem("sueldoMensualPro",sueldoMensual);}
+function guardarMeta(){metaAhorro=Number(document.getElementById("metaAhorro").value||0);localStorage.setItem("metaAhorroPro",metaAhorro);}
+function agregarMovimiento(){
+  const mov={fecha:fecha.value,tipo:tipo.value,categoria:categoria.value,detalle:detalle.value||"Sin detalle",estado:estado.value,monto:Number(monto.value||0),medio:medio.value};
+  if(!mov.fecha || mov.monto<=0){alert("Ingresa fecha y monto válido.");return;}
+  movimientos.push(mov);guardar();detalle.value="";monto.value="";actualizarFiltros();actualizar();
+}
+function filtrar(){
+  const mes=filtroMes.value,t=filtroTipo.value,c=filtroCategoria.value,e=filtroEstado.value,b=buscar.value.toLowerCase();
+  return movimientos.filter(m=>{const mm=m.fecha?m.fecha.slice(0,7):"";return(!mes||mm===mes)&&(!t||m.tipo===t)&&(!c||m.categoria===c)&&(!e||m.estado===e)&&(!b||m.detalle.toLowerCase().includes(b)||m.categoria.toLowerCase().includes(b));});
+}
+function actualizar(){
+  guardarSueldo();guardarMeta();
+  const data=filtrar();
+  const ingresosExtra=data.filter(m=>m.tipo==="Ingreso").reduce((a,b)=>a+b.monto,0);
+  const gastos=data.filter(m=>m.tipo==="Gasto").reduce((a,b)=>a+b.monto,0);
+  const saldo=sueldoMensual+ingresosExtra-gastos;
+  const porcentaje=sueldoMensual>0?gastos/sueldoMensual:0;
+  const pct=Math.min(Math.max(porcentaje*100,0),100);
+  presupuestoInicial.textContent=moneda(sueldoMensual);saldoVisual.textContent=moneda(saldo);
+  flowSueldo.textContent=moneda(sueldoMensual+ingresosExtra);flowGastos.textContent=moneda(gastos);flowSaldo.textContent=moneda(saldo);
+  barraGasto.style.width=pct+"%";textoBarra.textContent=Math.round(porcentaje*100)+"% usado del sueldo";
+  kpiIngresos.textContent=moneda(ingresosExtra);kpiGastos.textContent=moneda(gastos);kpiSaldo.textContent=moneda(saldo);
+  kpiDiario.textContent=moneda(saldo/diasRestantesMes());
+  alerta.textContent = sueldoMensual===0 ? "Ingresa el sueldo mensual para calcular el presupuesto." :
+    porcentaje<.65 ? "🟢 Excelente: todavía queda buena parte del sueldo disponible." :
+    porcentaje<.85 ? "🟡 Atención: ya se usó una parte importante del sueldo." :
+    porcentaje<=1 ? "🟠 Cuidado: queda poco saldo para el mes." :
+    "🔴 Alerta: los gastos superan el sueldo mensual.";
+  renderTabla(data); renderMeta(saldo); renderBudgets(data); renderPagos(); renderCharts(data);
+}
+function diasRestantesMes(){const now=new Date();return Math.max(1,new Date(now.getFullYear(),now.getMonth()+1,0).getDate()-now.getDate()+1);}
+function renderTabla(data){
+  tabla.innerHTML="";
+  data.slice().reverse().forEach(m=>{const i=movimientos.indexOf(m);tabla.innerHTML+=`<tr><td>${m.fecha}</td><td><span class="pill ${m.tipo==="Ingreso"?"ingreso":"gasto"}">${m.tipo==="Ingreso"?"Ingreso extra":"Gasto"}</span></td><td>${m.categoria}</td><td>${m.detalle}</td><td><span class="pill ${m.estado==="Pagado"?"pagado":"pendiente"}">${m.estado}</span></td><td><b>${moneda(m.monto)}</b></td><td><button class="btn-green" onclick="cambiarEstado(${i})">Estado</button><br><br><button class="btn-danger" onclick="eliminar(${i})">Eliminar</button></td></tr>`});
+}
+function renderMeta(saldo){
+  const avance = metaAhorro>0 ? Math.min(Math.max((saldo/metaAhorro)*100,0),100) : 0;
+  metaFill.style.width=avance+"%";
+  metaTexto.textContent=`Meta: ${moneda(metaAhorro)} | Disponible actual: ${moneda(saldo)} | Avance: ${Math.round(avance)}%`;
+}
+function guardarBudget(){
+  budgets[budgetCat.value]=Number(budgetMonto.value||0);
+  localStorage.setItem("budgetsPro",JSON.stringify(budgets)); budgetMonto.value=""; actualizar();
+}
+function renderBudgets(data){
+  const cats=["Arriendo / Vivienda","Supermercado","Transporte","Servicios","Salud","Deudas / Cuotas","Ocio","Ahorro","Otro"];
+  budgetCat.innerHTML=cats.map(c=>`<option>${c}</option>`).join("");
+  budgetList.innerHTML="";
+  cats.forEach(c=>{
+    const max=budgets[c]||0;if(max<=0)return;
+    const gasto=data.filter(m=>m.tipo==="Gasto"&&m.categoria===c).reduce((a,b)=>a+b.monto,0);
+    const pct=Math.min((gasto/max)*100,100);
+    budgetList.innerHTML+=`<div style="margin:12px 0"><b>${c}</b><span class="right small" style="float:right">${moneda(gasto)} / ${moneda(max)}</span><div class="budget-line"><div class="budget-fill" style="width:${pct}%"></div></div></div>`;
+  });
+}
+function renderPagos(){
+  const hoy=new Date();
+  const prox=movimientos.filter(m=>m.tipo==="Gasto"&&m.estado==="Pendiente").sort((a,b)=>a.fecha.localeCompare(b.fecha)).slice(0,5);
+  pagosProximos.innerHTML=prox.length?prox.map(m=>`<p>📌 <b>${m.fecha}</b> — ${m.detalle}: <b>${moneda(m.monto)}</b></p>`).join(""):"Sin pagos pendientes registrados.";
+}
+function renderCharts(data){
+  const gastos=data.filter(m=>m.tipo==="Gasto"), porCat={};
+  gastos.forEach(m=>porCat[m.categoria]=(porCat[m.categoria]||0)+m.monto);
+  if(chartCategorias)chartCategorias.destroy();
+  chartCategorias=new Chart(document.getElementById("chartCategorias"),{type:"doughnut",data:{labels:Object.keys(porCat),datasets:[{data:Object.values(porCat)}]},options:{plugins:{legend:{position:"bottom"}}}});
+  const meses=[...new Set(movimientos.map(m=>m.fecha.slice(0,7)))].sort();
+  const gastoMes=meses.map(ms=>movimientos.filter(m=>m.tipo==="Gasto"&&m.fecha.slice(0,7)===ms).reduce((a,b)=>a+b.monto,0));
+  const ingMes=meses.map(ms=>movimientos.filter(m=>m.tipo==="Ingreso"&&m.fecha.slice(0,7)===ms).reduce((a,b)=>a+b.monto,0)+sueldoMensual);
+  if(chartMensual)chartMensual.destroy();
+  chartMensual=new Chart(document.getElementById("chartMensual"),{type:"bar",data:{labels:meses,datasets:[{label:"Ingresos + sueldo",data:ingMes},{label:"Gastos",data:gastoMes}]},options:{plugins:{legend:{position:"bottom"}},scales:{y:{beginAtZero:true}}}});
+}
+function cambiarEstado(i){movimientos[i].estado=movimientos[i].estado==="Pagado"?"Pendiente":"Pagado";guardar();actualizar();}
+function eliminar(i){if(confirm("¿Eliminar este movimiento?")){movimientos.splice(i,1);guardar();actualizarFiltros();actualizar();}}
+function borrarTodo(){if(confirm("¿Seguro que quieres borrar todos los movimientos?")){movimientos=[];guardar();actualizarFiltros();actualizar();}}
+function exportarCSV(){
+  const data=filtrar(), header=["Fecha","Tipo","Categoría","Detalle","Estado","Monto","Medio"];
+  const rows=data.map(m=>[m.fecha,m.tipo,m.categoria,m.detalle,m.estado,m.monto,m.medio]);
+  const csv=[header,...rows].map(r=>r.map(x=>`"${String(x).replaceAll('"','""')}"`).join(";")).join("\n");
+  const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"}),url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url;a.download="movimientos_financieros.csv";a.click();URL.revokeObjectURL(url);
+}
+function actualizarFiltros(){
+  const meses=[...new Set(movimientos.map(m=>m.fecha?.slice(0,7)).filter(Boolean))].sort();
+  const cats=[...new Set(movimientos.map(m=>m.categoria).filter(Boolean))].sort();
+  const mesSel=filtroMes.value,catSel=filtroCategoria.value;
+  filtroMes.innerHTML='<option value="">Todos</option>'+meses.map(m=>`<option>${m}</option>`).join("");
+  filtroCategoria.innerHTML='<option value="">Todas</option>'+cats.map(c=>`<option>${c}</option>`).join("");
+  filtroMes.value=mesSel;filtroCategoria.value=catSel;
+}
+actualizarFiltros();actualizar();
+</script>
+</body>
+</html>
